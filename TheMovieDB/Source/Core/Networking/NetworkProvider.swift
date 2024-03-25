@@ -14,13 +14,20 @@ protocol NetworkProviderType {
     func execute(for request: URLRequest) -> AnyPublisher<Data, APIError>
 }
 
+// MARK: - NetworkProvider
 struct NetworkProvider: NetworkProviderType {
     // MARK: - Properties
     private let session: Session
 
+    // MARK: - Initializer
+    init(session: Session) {
+        self.session = session
+    }
+
     // MARK: - Execute
     func execute(for request: URLRequest) -> AnyPublisher<Data, APIError> {
         return Future { promise in
+            print(request)
             session.request(request).responseData { response in
                 switch response.result {
                 case .success(let responseData):
@@ -37,4 +44,9 @@ struct NetworkProvider: NetworkProviderType {
         }
         .eraseToAnyPublisher()
     }
+}
+
+// MARK: - Dependency Protocol
+protocol HasNetworkProvider {
+    var networkProvider: NetworkProviderType { get }
 }
