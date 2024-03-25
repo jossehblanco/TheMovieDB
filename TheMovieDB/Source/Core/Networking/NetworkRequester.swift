@@ -16,16 +16,32 @@ protocol NetworkRequesterType {
 
 // MARK: - NetworkRequester
 struct NetworkRequester: NetworkRequesterType {
-    let provider: NetworkProviderType
+    // MARK: - Dependencies
+    typealias Dependencies = HasNetworkProvider
+
+    // MARK: - Dependencies
+    private let dependencies: Dependencies
+
+    // MARK: - Initializer
+    init(dependencies: Dependencies) {
+        self.dependencies = dependencies
+    }
 
     // MARK: - Execute Function
     func execute(for endpoint: TargetType) -> AnyPublisher<Data, APIError> {
-        return provider.execute(for: endpoint.request).eraseToAnyPublisher()
+        dependencies.networkProvider.execute(for: endpoint.request).eraseToAnyPublisher()
+    }
+}
+
+// MARK: - Dependency Struct
+struct NetworkRequesterDependencies: NetworkRequester.Dependencies {
+    var networkProvider: NetworkProviderType {
+        NetworkProvider(session: .default)
     }
 }
 
 // MARK: - Decodable Extension
-extension NetworkRequester {
+extension NetworkRequesterType {
     func execute<T: Decodable>(for endpoint: TargetType, with decoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<T, APIError> {
         execute(for: endpoint)
             .decode(type: T.self, decoder: decoder)
@@ -37,4 +53,9 @@ extension NetworkRequester {
             }
             .eraseToAnyPublisher()
     }
+}
+
+// MARK: - Dependency Protocol
+protocol HasNetworkRequester {
+    var networkRequester: NetworkRequesterType { get }
 }
