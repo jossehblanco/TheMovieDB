@@ -32,6 +32,27 @@ extension TargetType {
         case .urlParameters(let queryItems):
             request.url = requestUrl.appending(queryItems: queryItems.map { .init(name: $0.key, value: $0.value)})
         }
+
+        headers
+            .forEach { key, value in
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+
         return request
+    }
+}
+
+// MARK: - App Values
+extension TargetType {
+    var baseUrl: URL {
+        URL(string: "https://api.themoviedb.org/3")!
+    }
+
+    var headers: [String: String] {
+        return ["accept": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhODY5YTQyMGY5ZjNlYjc5NzlkNTQ1MTQ3YjQzMGQyYyIsInN1YiI6IjYwYzJiYTU5MWM2YWE3MDAyYWM3NGViNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.65Gpbvy0PJHJplUWGVDlNgITbT-OW0DGi1zkvbEB3AA"]
+    }
+
+    var sampleData: Data {
+        Data()
     }
 }
